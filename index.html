@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X1NON – Low‑level enthusiast</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #d4d4d4;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: transparent;
+            box-shadow:
+                10px 20px 2px #fff, 150px 80px 1px #fff, 300px 40px 2px #fff,
+                500px 120px 1px #fff, 700px 30px 2px #fff, 850px 200px 1px #fff,
+                90px 300px 2px #fff, 250px 400px 1px #fff, 400px 350px 2px #fff,
+                620px 500px 1px #fff, 780px 450px 2px #fff, 900px 600px 1px #fff,
+                1100px 150px 2px #fff, 1300px 250px 1px #fff, 1050px 380px 2px #fff,
+                40px 500px 1px #fff, 300px 600px 2px #fff, 550px 680px 1px #fff,
+                750px 720px 2px #fff, 1000px 800px 1px #fff;
+            animation: twinkle 4s infinite alternate;
+            z-index: -1;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: flex;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .profile-sidebar {
+            flex: 0 0 300px;
+            position: sticky;
+            top: 2rem;
+            align-self: flex-start;
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #333;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+        h1, h2, h3 {
+            color: #f0f0f0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .badges img {
+            margin: 0.25rem 0.5rem 0.25rem 0;
+            display: inline-block;
+        }
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        a:hover { text-decoration: underline; }
+
+        /* File browser */
+        #repo-browser {
+            background: rgba(20, 20, 20, 0.85);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid #333;
+            margin-bottom: 2rem;
+        }
+        .file-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .file-list li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .file-list li:last-child { border-bottom: none; }
+        .file-list .folder {
+            color: #ffd700;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .file-list .file {
+            cursor: pointer;
+            color: #bbb;
+        }
+        .file-list .file:hover, .file-list .folder:hover {
+            background: #222;
+            border-radius: 4px;
+            padding-left: 0.5rem;
+        }
+        .nav-buttons {
+            margin-bottom: 1rem;
+        }
+        .nav-buttons button {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .nav-buttons button:hover {
+            background: #555;
+        }
+
+        /* Book viewer */
+        #book-viewer {
+            background: rgba(20, 20, 20, 0.85);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid #333;
+            line-height: 1.7;
+        }
+        #book-viewer pre {
+            background: #1a1a1a;
+            padding: 1rem;
+            overflow-x: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        #book-viewer code {
+            font-family: 'Courier New', monospace;
+        }
+        #book-viewer h1, #book-viewer h2, #book-viewer h3 {
+            border-bottom: none;
+            margin: 1.5rem 0 0.8rem;
+            scroll-margin-top: 100px;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* TOC inside viewer */
+        #toc {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 2rem;
+        }
+        #toc li { margin: 0.3rem 0; }
+        #toc a { color: #aaa; }
+
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            opacity: 0.6;
+            margin-top: 4rem;
+            padding-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+            .profile-sidebar {
+                position: static;
+                max-height: none;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Profile Sidebar -->
+    <aside class="profile-sidebar">
+        <h2 style="border-bottom: none; margin-bottom: 1rem;">💫 X1NON</h2>
+        <p><strong>Low‑level enthusiast. C • Linux • Reverse Engineering • Exploit Development</strong><br>
+        I break things to understand them – then I write a book about it.</p>
+        <ul style="margin: 1rem 0; padding-left: 1.2rem;">
+            <li>🔭 Teaching at Novin Zehn & writing <em>C: Zero to Exploit Dev</em></li>
+            <li>🌱 Learning x86‑64 asm & kernel exploitation</li>
+            <li>🧠 Built X1inux from scratch</li>
+            <li>🏆 $500 bug bounty · AI jailbreak (~$10k)</li>
+            <li>⚡ YouTube over Tor? DPI can't catch obfs4</li>
+        </ul>
+
+        <h3 style="border-bottom: 1px solid #333; padding-bottom: 0.3rem;">🌐 Socials</h3>
+        <div class="badges">
+            <a href="https://github.com/x1non"><img src="https://img.shields.io/badge/GitHub-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+            <a href="mailto:arya@x1inux.dev"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"></a>
+            <a href="https://discord.gg/..."><img src="https://img.shields.io/badge/Discord-%237289DA.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
+            <img src="https://komarev.com/ghpvc/?username=x1non&color=blueviolet" alt="Visitor Count">
+        </div>
+
+        <h3 style="border-bottom: 1px solid #333; padding-bottom: 0.3rem; margin-top: 2rem;">💻 Weapons</h3>
+        <div class="badges" style="line-height: 2.2;">
+            <img src="https://img.shields.io/badge/c-%2300599C.svg?style=for-the-badge&logo=c&logoColor=white" alt="C">
+            <img src="https://img.shields.io/badge/assembly-%23FF0000.svg?style=for-the-badge&logo=intel&logoColor=white" alt="Assembly">
+            <img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python">
+            <img src="https://img.shields.io/badge/bash-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash">
+            <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
+            <img src="https://img.shields.io/badge/Arch-%231793D1.svg?style=for-the-badge&logo=arch-linux&logoColor=white" alt="Arch">
+            <img src="https://img.shields.io/badge/Neovim-57A143?style=for-the-badge&logo=neovim&logoColor=white" alt="Neovim">
+            <img src="https://img.shields.io/badge/GDB-%23FF6600.svg?style=for-the-badge&logo=gnu&logoColor=white" alt="GDB">
+            <img src="https://img.shields.io/badge/objdump-%23000000.svg?style=for-the-badge&logo=linux&logoColor=white" alt="objdump">
+            <img src="https://img.shields.io/badge/Ghidra-%23FF6C37.svg?style=for-the-badge&logo=ghidra&logoColor=white" alt="Ghidra">
+            <img src="https://img.shields.io/badge/pwntools-%233776A8.svg?style=for-the-badge&logo=python&logoColor=white" alt="pwntools">
+            <img src="https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+            <img src="https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white" alt="Git">
+            <img src="https://img.shields.io/badge/tor-%237E4798.svg?style=for-the-badge&logo=tor-project&logoColor=white" alt="Tor">
+            <img src="https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white" alt="WireGuard">
+            <img src="https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi" alt="Raspberry Pi">
+        </div>
+    </aside>
+
+    <!-- Main area: Repo Browser + Viewer -->
+    <main class="main-content">
+        <section id="browser-section">
+            <h2>📖 C: Zero to Exploit Dev</h2>
+            <div id="repo-browser">
+                <div class="nav-buttons">
+                    <button id="back-btn" style="display:none;">⬅ Back</button>
+                    <span id="current-path" style="color: #aaa;"></span>
+                </div>
+                <ul id="file-list" class="file-list">
+                    <li class="loading">Loading repository structure...</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="viewer-section" style="display:none;">
+            <div id="book-viewer"></div>
+        </section>
+
+        <footer>
+            <p>© X1NON – Built with caffeine and kernel panics.</p>
+        </footer>
+    </main>
+</div>
+
+<!-- Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    // ====== CONFIGURATION ======
+    const BOOK_REPO = 'https://github.com/X1NONs/C-for-exploit-development';   // <-- Change if needed
+    const API_BASE = `https://api.github.com/repos/${BOOK_REPO}`;
+
+    // Elements
+    const fileList = document.getElementById('file-list');
+    const backBtn = document.getElementById('back-btn');
+    const currentPathSpan = document.getElementById('current-path');
+    const browserSection = document.getElementById('browser-section');
+    const viewerSection = document.getElementById('viewer-section');
+    const bookViewer = document.getElementById('book-viewer');
+
+    // State
+    let repoTree = [];                // flat list of {path, type, url}
+    let currentPath = '';             // e.g., '' or 'chapter1/'
+    let currentFileSha = null;        // for raw URL fallback
+
+    // Fetch the full tree (recursive)
+    async function loadRepoTree() {
+        try {
+            // Get the default branch
+            const repoRes = await fetch(API_BASE);
+            if (!repoRes.ok) throw new Error('Repo not found or private');
+            const repoData = await repoRes.json();
+            const defaultBranch = repoData.default_branch;
+
+            // Get tree recursively
+            const treeRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/git/trees/${defaultBranch}?recursive=1`);
+            if (!treeRes.ok) throw new Error('Failed to load tree');
+            const treeData = await treeRes.json();
+            repoTree = treeData.tree.filter(item => item.type === 'blob' || item.type === 'tree');
+            // Sort: folders first, then files
+            repoTree.sort((a, b) => {
+                if (a.type === b.type) return a.path.localeCompare(b.path);
+                return a.type === 'tree' ? -1 : 1;
+            });
+            renderDirectory('');
+        } catch (err) {
+            fileList.innerHTML = `<li class="loading">⚠️ ${err.message}. Make sure the repo exists and is public.</li>`;
+        }
+    }
+
+    // Render a directory listing for a given path
+    function renderDirectory(path) {
+        currentPath = path;
+        currentPathSpan.textContent = path ? `📁 /${path}` : '';
+        backBtn.style.display = path ? 'inline-block' : 'none';
+        viewerSection.style.display = 'none';
+        browserSection.style.display = 'block';
+
+        // Get all items directly inside this path
+        const prefix = path ? path + '/' : '';
+        const files = repoTree.filter(item => {
+            if (!item.path.startsWith(prefix)) return false;
+            const relative = item.path.slice(prefix.length);
+            return relative.indexOf('/') === -1; // no subfolder
+        });
+
+        if (files.length === 0) {
+            fileList.innerHTML = '<li class="loading">This folder is empty.</li>';
+            return;
+        }
+
+        fileList.innerHTML = '';
+        files.forEach(item => {
+            const li = document.createElement('li');
+            if (item.type === 'tree') {
+                li.className = 'folder';
+                li.textContent = '📁 ' + item.path.split('/').pop();
+                li.addEventListener('click', () => renderDirectory(item.path));
+            } else {
+                li.className = 'file';
+                const filename = item.path.split('/').pop();
+                li.textContent = filename;
+                li.addEventListener('click', () => openFile(item));
+            }
+            fileList.appendChild(li);
+        });
+    }
+
+    // Open a file (Markdown) for viewing
+    async function openFile(item) {
+        browserSection.style.display = 'none';
+        viewerSection.style.display = 'block';
+        bookViewer.innerHTML = '<p class="loading">Loading...</p>';
+
+        try {
+            // Use GitHub API to get file content (base64)
+            const fileRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/contents/${item.path}`);
+            if (!fileRes.ok) throw new Error('File not found');
+            const fileData = await fileRes.json();
+            const content = atob(fileData.content); // decode base64
+            const ext = item.path.split('.').pop().toLowerCase();
+
+            if (ext === 'md') {
+                // Render markdown
+                const html = marked.parse(content);
+                bookViewer.innerHTML = html;
+
+                // Build TOC from h2/h3
+                const tocDiv = document.createElement('div');
+                tocDiv.id = 'toc';
+                const headings = bookViewer.querySelectorAll('h2, h3');
+                if (headings.length > 0) {
+                    const tocHeader = document.createElement('p');
+                    tocHeader.innerHTML = '<strong>Table of Contents</strong>';
+                    tocDiv.appendChild(tocHeader);
+                    const ul = document.createElement('ul');
+                    headings.forEach((heading, i) => {
+                        if (!heading.id) heading.id = 'heading-' + i;
+                        const li = document.createElement('li');
+                        const a = document.createElement('a');
+                        a.href = '#' + heading.id;
+                        a.textContent = heading.textContent;
+                        li.appendChild(a);
+                        if (heading.tagName === 'H3') li.style.paddingLeft = '1.5rem';
+                        ul.appendChild(li);
+                    });
+                    tocDiv.appendChild(ul);
+                    bookViewer.prepend(tocDiv);
+                }
+            } else if (['txt', 'c', 'h', 'py', 's', 'asm', 'sh', 'json', 'cfg'].includes(ext)) {
+                // Display as plain text
+                bookViewer.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
+            } else {
+                bookViewer.innerHTML = `<p>Cannot preview this file type. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${item.path}" target="_blank">View raw</a></p>`;
+            }
+        } catch (err) {
+            bookViewer.innerHTML = `<p class="loading">⚠️ Error loading file: ${err.message}</p>`;
+        }
+
+        // Back button returns to directory
+        backBtn.style.display = 'inline-block';
+        backBtn.onclick = () => {
+            const dirParts = item.path.split('/');
+            dirParts.pop(); // remove file name
+            const dir = dirParts.join('/');
+            renderDirectory(dir);
+        };
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Global back button for directory view
+    backBtn.addEventListener('click', () => {
+        if (currentPath) {
+            const parts = currentPath.split('/');
+            parts.pop();
+            renderDirectory(parts.join('/'));
+        }
+    });
+
+    // Start
+    loadRepoTree();
+</script>
+</body>
+</html>
