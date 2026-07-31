@@ -16,34 +16,14 @@
             position: relative;
         }
 
-        /* ---- animated starfield (brighter, more visible) ---- */
-        .stars {
+        /* ---- animated starfield: canvas driven by JS (twinkle + shooting stars) ---- */
+        #starfield {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 0;
             pointer-events: none;
-        }
-        .stars::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            /* many bright white stars at random positions */
-            box-shadow:
-                20px 30px 3px #fff, 160px 90px 2px #fff, 310px 50px 3px #fff,
-                510px 130px 2px #fff, 710px 40px 3px #fff, 860px 210px 2px #fff,
-                100px 310px 3px #fff, 260px 410px 2px #fff, 410px 360px 3px #fff,
-                630px 510px 2px #fff, 790px 460px 3px #fff, 910px 610px 2px #fff,
-                1110px 160px 3px #fff, 1310px 260px 2px #fff, 1060px 390px 3px #fff,
-                50px 510px 2px #fff, 310px 620px 3px #fff, 560px 690px 2px #fff,
-                760px 730px 3px #fff, 1010px 810px 2px #fff,
-                1180px 110px 2px #fff, 1390px 410px 3px #fff, 1570px 220px 2px #fff;
-            animation: twinkle 4s infinite alternate;
-        }
-        @keyframes twinkle {
-            0% { opacity: 0.7; }
-            100% { opacity: 1; }
+            display: block;
         }
 
         .container {
@@ -76,18 +56,22 @@
             font-size: 1.6rem;
             color: #fff;
             border-bottom: none;
-            margin-bottom: 0.8rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .avatar-wrap {
             display: flex;
-            align-items: center;
-            gap: 0.7rem;
+            justify-content: center;
+            margin-bottom: 1.4rem;
         }
         .avatar {
-            width: 80px;
-            height: 80px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
-            border: 2px solid #444;
+            border: 3px solid #444;
             object-fit: cover;
             display: block;
+            box-shadow: 0 0 30px rgba(88, 166, 255, 0.15);
         }
         .profile-sidebar .bio {
             font-size: 0.95rem;
@@ -126,12 +110,39 @@
         }
 
         .quote-container {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .quote-container img {
-            max-width: 100%;
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid #58a6ff;
             border-radius: 8px;
+            padding: 1.3rem 1.4rem 1.1rem;
+            overflow: hidden;
+        }
+        .quote-mark {
+            position: absolute;
+            top: -0.8rem;
+            left: 0.7rem;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 3.5rem;
+            line-height: 1;
+            color: #58a6ff;
+            opacity: 0.2;
+        }
+        .quote-text {
+            position: relative;
+            z-index: 1;
+            font-size: 0.95rem;
+            font-style: italic;
+            color: #d4d4d4;
+            line-height: 1.55;
+        }
+        .quote-author {
+            margin-top: 0.7rem;
+            font-size: 0.8rem;
+            color: #8b8b9a;
+            text-align: right;
+        }
+        .quote-author::before {
+            content: "— ";
         }
 
         /* ---- main content area ---- */
@@ -226,18 +237,17 @@
 <body>
 
 <!-- animated starfield background -->
-<div class="stars"></div>
+<canvas id="starfield"></canvas>
 
 <div class="container">
 
     <!-- SIDEBAR – 400px wide, with avatar, matching README -->
     <aside class="profile-sidebar">
 
-        <!-- Avatar and About Me heading together -->
-        <h1>
+        <h1>💫 About Me</h1>
+        <div class="avatar-wrap">
             <img class="avatar" src="https://github.com/X1NONs.png" alt="X1NON avatar">
-            💫 About Me
-        </h1>
+        </div>
 
         <p class="bio">
             <strong>Low‑level enthusiast. C • Linux • Reverse Engineering • Exploit Development</strong><br>
@@ -253,12 +263,9 @@
             <li>⚡ <strong>Fun fact:</strong> I route YouTube over Tor on mobile data because DPI can't catch obfs4.</li>
         </ul>
 
-        <!-- Social badges (optional) -->
-        <div class="badges">
+        <!-- Social badges -->
+        <div class="badges" style="justify-content: center;">
             <a href="https://github.com/X1NONs"><img src="https://img.shields.io/badge/GitHub-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-            <a href="mailto:arya@x1inux.dev"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"></a>
-            <a href="https://discord.gg/..."><img src="https://img.shields.io/badge/Discord-%237289DA.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-            <img src="https://komarev.com/ghpvc/?username=X1NONs&color=blueviolet" alt="Visitor Count">
         </div>
 
         <div class="section-title">💻 Weapons of Choice</div>
@@ -282,8 +289,11 @@
         </div>
 
         <!-- Quote of the Day -->
+        <div class="section-title">📜 Quote of the Day</div>
         <div class="quote-container">
-            <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight" alt="Quote of the Day">
+            <div class="quote-mark">&ldquo;</div>
+            <p class="quote-text" id="quote-text">Loading quote…</p>
+            <p class="quote-author" id="quote-author"></p>
         </div>
 
     </aside>
@@ -314,6 +324,97 @@
 
     </main>
 </div>
+
+<!-- Starfield: twinkling stars + occasional shooting stars -->
+<script>
+(function() {
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let w, h, stars = [], shootingStars = [];
+
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        generateStars();
+    }
+
+    function generateStars() {
+        const count = Math.floor((w * h) / 5000);
+        stars = [];
+        for (let i = 0; i < count; i++) {
+            stars.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: Math.random() * 1.3 + 0.3,
+                baseAlpha: Math.random() * 0.5 + 0.4,
+                speed: Math.random() * 0.02 + 0.006,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+    }
+
+    function maybeSpawnShootingStar() {
+        if (shootingStars.length < 2 && Math.random() < 0.0025) {
+            const startX = Math.random() * w * 0.7 + w * 0.15;
+            const startY = Math.random() * h * 0.3;
+            const angle = Math.PI / 4 + (Math.random() * 0.3 - 0.15);
+            const speed = 9 + Math.random() * 7;
+            shootingStars.push({
+                x: startX, y: startY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 0,
+                maxLife: 45 + Math.random() * 20,
+                length: 90 + Math.random() * 60
+            });
+        }
+    }
+
+    function draw(time) {
+        ctx.clearRect(0, 0, w, h);
+
+        for (const s of stars) {
+            const alpha = s.baseAlpha * (0.55 + 0.45 * Math.sin(time * s.speed + s.phase));
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.fill();
+        }
+
+        maybeSpawnShootingStar();
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+            const sh = shootingStars[i];
+            sh.x += sh.vx;
+            sh.y += sh.vy;
+            sh.life++;
+            const alpha = 1 - sh.life / sh.maxLife;
+            const norm = Math.hypot(sh.vx, sh.vy);
+            const tailX = sh.x - (sh.vx / norm) * sh.length;
+            const tailY = sh.y - (sh.vy / norm) * sh.length;
+
+            const grad = ctx.createLinearGradient(sh.x, sh.y, tailX, tailY);
+            grad.addColorStop(0, `rgba(255,255,255,${alpha})`);
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sh.x, sh.y);
+            ctx.lineTo(tailX, tailY);
+            ctx.stroke();
+
+            if (sh.life > sh.maxLife || sh.x > w + 100 || sh.y > h + 100) {
+                shootingStars.splice(i, 1);
+            }
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(draw);
+})();
+</script>
 
 <!-- Marked.js for Markdown rendering -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -453,6 +554,58 @@
     });
 
     loadRepoTree();
+</script>
+
+<!-- Quote of the Day -->
+<script>
+(function() {
+    const quotes = [
+        { text: "Talk is cheap. Show me the code.", author: "Linus Torvalds" },
+        { text: "Programs must be written for people to read, and only incidentally for machines to execute.", author: "Harold Abelson" },
+        { text: "The most effective debugging tool is still careful thought, coupled with judiciously placed print statements.", author: "Brian Kernighan" },
+        { text: "In C++ it's harder to shoot yourself in the foot, but when you do, you blow off your whole leg.", author: "Bjarne Stroustrup" },
+        { text: "There are only two hard things in Computer Science: cache invalidation and naming things.", author: "Phil Karlton" },
+        { text: "Security is a process, not a product.", author: "Bruce Schneier" },
+        { text: "Simplicity is a prerequisite for reliability.", author: "Edsger W. Dijkstra" },
+        { text: "Premature optimization is the root of all evil.", author: "Donald Knuth" },
+        { text: "A ship in port is safe, but that's not what ships are built for.", author: "Grace Hopper" },
+        { text: "Any sufficiently advanced technology is indistinguishable from magic.", author: "Arthur C. Clarke" },
+        { text: "The best way to predict the future is to invent it.", author: "Alan Kay" },
+        { text: "It's not a bug, it's an undocumented feature.", author: "Anonymous" },
+        { text: "Given enough eyeballs, all bugs are shallow.", author: "Eric S. Raymond" },
+        { text: "The quieter you become, the more you are able to hear.", author: "Ram Dass" },
+        { text: "Weeks of coding can save you hours of planning.", author: "Anonymous" }
+    ];
+
+    function dayOfYear() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        return Math.floor((now - start) / 86400000);
+    }
+
+    function renderQuote(text, author) {
+        document.getElementById('quote-text').textContent = text;
+        document.getElementById('quote-author').textContent = author;
+    }
+
+    async function loadQuote() {
+        const pick = quotes[dayOfYear() % quotes.length];
+        renderQuote(pick.text, pick.author);
+
+        // Best-effort: try to freshen it from a live API, silently keep the
+        // local quote above if the service is unreachable.
+        try {
+            const res = await fetch('https://api.quotable.io/random?tags=technology|famous-quotes');
+            if (!res.ok) throw new Error('unavailable');
+            const data = await res.json();
+            if (data && data.content) renderQuote(data.content, data.author);
+        } catch (e) {
+            /* keep local fallback quote */
+        }
+    }
+
+    loadQuote();
+})();
 </script>
 </body>
 </html>
