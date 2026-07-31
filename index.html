@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>X1NON – Low‑level enthusiast</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -51,6 +52,22 @@
             max-height: calc(100vh - 4rem);
             overflow-y: auto;
             line-height: 1.6;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3a4a rgba(0, 0, 0, 0.2);
+        }
+        .profile-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .profile-sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .profile-sidebar::-webkit-scrollbar-thumb {
+            background: #3a3a4a;
+            border-radius: 8px;
+        }
+        .profile-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #4a4a5f;
         }
         .profile-sidebar h1 {
             font-size: 1.6rem;
@@ -209,6 +226,95 @@
         }
         #book-viewer code { font-family: 'Courier New', monospace; }
 
+        /* ---- fake terminal ---- */
+        #terminal-section { margin-top: 2rem; }
+        #terminal {
+            background: #0c0c14;
+            border-radius: 12px;
+            border: 1px solid #2a2a3a;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .terminal-titlebar {
+            background: #1a1a24;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-bottom: 1px solid #2a2a3a;
+        }
+        .terminal-titlebar .dot {
+            width: 11px; height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+        .terminal-title {
+            margin-left: 0.6rem;
+            color: #888;
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace;
+        }
+        .terminal-body {
+            padding: 1rem 1.2rem;
+            max-height: 420px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+            word-break: break-word;
+            cursor: text;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3a4a rgba(0, 0, 0, 0.2);
+        }
+        .terminal-body::-webkit-scrollbar { width: 8px; }
+        .terminal-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .terminal-body::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 8px; }
+        .terminal-line { color: #8b8b9a; }
+        .terminal-line .prompt-inline { color: #7ee787; margin-right: 0.4rem; }
+        .terminal-output-line { color: #d4d4d4; }
+        .neofetch-wrap {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .neofetch-ascii {
+            color: #58a6ff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            line-height: 1.05;
+            white-space: pre;
+        }
+        .neofetch-info { font-size: 0.82rem; }
+        .neofetch-info .nf-user { color: #7ee787; font-weight: bold; }
+        .neofetch-info .nf-key { color: #58a6ff; }
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1.2rem 1rem;
+            border-top: 1px solid #1a1a24;
+        }
+        .terminal-input-line .prompt {
+            color: #7ee787;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        #terminal-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
         .loading {
             text-align: center;
             padding: 2rem;
@@ -318,6 +424,21 @@
             <div id="book-viewer"></div>
         </section>
 
+        <section id="terminal-section">
+            <h2 style="color:#fff; border-bottom: 1px solid #333; padding-bottom:0.5rem;">💻 Terminal</h2>
+            <div id="terminal">
+                <div class="terminal-titlebar">
+                    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                    <span class="terminal-title">x1non@x1inux:~</span>
+                </div>
+                <div class="terminal-body" id="terminal-output"></div>
+                <div class="terminal-input-line">
+                    <span class="prompt">x1non@x1inux:~$</span>
+                    <input type="text" id="terminal-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="200" aria-label="Terminal command input">
+                </div>
+            </div>
+        </section>
+
         <footer>
             <p>© X1NON – Built with caffeine and kernel panics.</p>
         </footer>
@@ -416,6 +537,14 @@
 })();
 </script>
 
+<!-- Prism.js for syntax highlighting in the book viewer -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-nasm.min.js"></script>
+
 <!-- Marked.js for Markdown rendering -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
@@ -505,6 +634,7 @@
             if (ext === 'md') {
                 const html = marked.parse(content);
                 bookViewer.innerHTML = html;
+                if (typeof Prism !== 'undefined') Prism.highlightAllUnder(bookViewer);
                 // Table of contents from h2/h3
                 const tocDiv = document.createElement('div');
                 tocDiv.id = 'toc';
@@ -525,7 +655,11 @@
                     bookViewer.prepend(tocDiv);
                 }
             } else if (['txt','c','h','py','s','asm','sh','json'].includes(ext)) {
-                bookViewer.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
+                const langMap = { c: 'c', h: 'c', py: 'python', s: 'nasm', asm: 'nasm', sh: 'bash', json: 'json' };
+                const lang = langMap[ext];
+                const codeClass = lang ? ` class="language-${lang}"` : '';
+                bookViewer.innerHTML = `<pre><code${codeClass}>${escapeHtml(content)}</code></pre>`;
+                if (lang && typeof Prism !== 'undefined') Prism.highlightAllUnder(bookViewer);
             } else {
                 bookViewer.innerHTML = `<p>Can't preview this file. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${item.path}" target="_blank">View raw</a></p>`;
             }
@@ -605,6 +739,167 @@
     }
 
     loadQuote();
+})();
+</script>
+
+<!-- Fake terminal (simulated bash, runs entirely client-side — no real shell, no eval) -->
+<script>
+(function() {
+    const output = document.getElementById('terminal-output');
+    const input = document.getElementById('terminal-input');
+    const terminalEl = document.getElementById('terminal');
+
+    // Reuse the same escaper used for the book viewer so user-typed text
+    // is NEVER inserted into the DOM unescaped.
+    function esc(text) {
+        return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    const NEOFETCH_HTML = `
+<div class="neofetch-wrap">
+<pre class="neofetch-ascii">                   -\`
+                  .o+\`
+                 \`ooo/
+                \`+oooo:
+               \`+oooooo:
+               -+oooooo+:
+             \`/:-:++oooo+:
+            \`/++++/+++++++:
+           \`/++++++++++++++:
+          \`/+++ooooooooooooo/\`
+         ./ooosssso++osssssso+\`
+        .oossssso-\`\`\`\`/ossssss+\`
+       -osssssso.      :ssssssso.
+      :osssssss/        osssso+++.
+     /ossssssss/        +ssssooo/-
+   \`/ossssso+/:-        -:/+osssso+-
+  \`+sso+:-\`                 \`.-/+oso:
+ \`++:.                           \`-/+/
+ .\`                                 \`/</pre>
+<div class="neofetch-info">
+<span class="nf-user">x1non@x1inux</span><br>
+-------------<br>
+<span class="nf-key">OS:</span> Arch Linux x86_64<br>
+<span class="nf-key">Host:</span> X1inux Custom Build<br>
+<span class="nf-key">Kernel:</span> 6.9.1-arch1-x1inux<br>
+<span class="nf-key">Shell:</span> bash 5.2.26<br>
+<span class="nf-key">DE/WM:</span> none / i3<br>
+<span class="nf-key">Terminal:</span> alacritty<br>
+<span class="nf-key">CPU:</span> x86_64 (8) @ 3.6GHz<br>
+<span class="nf-key">GPU:</span> /dev/null (headless by choice)<br>
+<span class="nf-key">Memory:</span> 2048MiB / 16384MiB
+</div>
+</div>`.trim();
+
+    function appendLine(html) {
+        const line = document.createElement('div');
+        line.innerHTML = html;
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    function echoCommand(rawText) {
+        appendLine(`<div class="terminal-line"><span class="prompt-inline">x1non@x1inux:~$</span>${esc(rawText)}</div>`);
+    }
+
+    // isTrustedHtml must ONLY ever be true for strings we authored ourselves
+    // (like NEOFETCH_HTML above), never for anything derived from user input.
+    function printOutput(text, isTrustedHtml) {
+        const safe = isTrustedHtml ? text : esc(text);
+        appendLine(`<div class="terminal-output-line">${safe}</div>`);
+    }
+
+    const files = {
+        'notes.txt': 'TODO: finish the ROP chapter.\nTODO: sleep before 3am for once.',
+        'toolchain/README': 'Custom cross-compiler build scripts for X1inux.'
+    };
+
+    function runCommand(rawInput) {
+        const trimmed = rawInput.trim();
+        echoCommand(rawInput);
+        if (!trimmed) return;
+
+        // Split on whitespace only — no shell metacharacters (;, |, &&, $(), backticks,
+        // redirects) are ever interpreted. Everything is plain string matching against
+        // a fixed allow-list of commands below; nothing here is passed to eval(), Function(),
+        // or any real shell/network call, so there's no command-injection surface.
+        const parts = trimmed.split(/\s+/);
+        const cmd = parts[0].toLowerCase();
+        const args = parts.slice(1);
+
+        switch (cmd) {
+            case 'help':
+                printOutput('Available commands: help, whoami, pwd, ls, cat <file>, neofetch, echo <text>, date, clear');
+                break;
+            case 'whoami':
+                printOutput('x1non');
+                break;
+            case 'pwd':
+                printOutput('/home/x1non');
+                break;
+            case 'ls':
+                printOutput('book/  exploits/  notes.txt  toolchain/');
+                break;
+            case 'date':
+                printOutput(new Date().toString());
+                break;
+            case 'clear':
+                output.innerHTML = '';
+                break;
+            case 'echo':
+                printOutput(args.join(' '));
+                break;
+            case 'sudo':
+                printOutput('x1non is not in the sudoers file. This incident will be reported.');
+                break;
+            case 'neofetch':
+                printOutput(NEOFETCH_HTML, true);
+                break;
+            case 'cat': {
+                if (!args[0]) { printOutput('cat: missing operand'); break; }
+                const f = files[args[0]];
+                printOutput(f ? f : `cat: ${args[0]}: No such file or directory`);
+                break;
+            }
+            default:
+                printOutput(`bash: ${cmd}: command not found`);
+        }
+    }
+
+    const history = [];
+    let historyIndex = -1;
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const val = input.value;
+            input.value = '';
+            if (val.trim()) { history.push(val); }
+            historyIndex = history.length;
+            runCommand(val);
+        } else if (e.key === 'ArrowUp') {
+            if (historyIndex > 0) {
+                historyIndex--;
+                input.value = history[historyIndex];
+            }
+            e.preventDefault();
+        } else if (e.key === 'ArrowDown') {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                input.value = history[historyIndex];
+            } else {
+                historyIndex = history.length;
+                input.value = '';
+            }
+            e.preventDefault();
+        }
+    });
+
+    terminalEl.addEventListener('click', () => input.focus());
+
+    // Boot message + auto neofetch, like a real dotfiles setup.
+    printOutput('Welcome to x1inux — simulated shell, runs entirely in your browser (no real system access).');
+    printOutput("Type 'help' to see available commands.");
+    printOutput(NEOFETCH_HTML, true);
 })();
 </script>
 </body>
