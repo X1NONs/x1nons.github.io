@@ -7,34 +7,45 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #0a0a0a;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
             color: #d4d4d4;
             font-family: 'Segoe UI', 'Courier New', monospace;
             overflow-x: hidden;
+            min-height: 100vh;
             position: relative;
-            line-height: 1.6;
         }
-        body::before {
-            content: '';
+
+        /* ---- starfield (animated) ---- */
+        .stars {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
             background: transparent;
+        }
+        .stars::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             box-shadow:
+                /* many small white stars – static */
                 10px 20px 2px #fff, 150px 80px 1px #fff, 300px 40px 2px #fff,
                 500px 120px 1px #fff, 700px 30px 2px #fff, 850px 200px 1px #fff,
                 90px 300px 2px #fff, 250px 400px 1px #fff, 400px 350px 2px #fff,
                 620px 500px 1px #fff, 780px 450px 2px #fff, 900px 600px 1px #fff,
                 1100px 150px 2px #fff, 1300px 250px 1px #fff, 1050px 380px 2px #fff,
                 40px 500px 1px #fff, 300px 600px 2px #fff, 550px 680px 1px #fff,
-                750px 720px 2px #fff, 1000px 800px 1px #fff;
+                750px 720px 2px #fff, 1000px 800px 1px #fff,
+                1200px 100px 1px #fff, 1400px 400px 1px #fff, 1600px 200px 2px #fff;
             animation: twinkle 4s infinite alternate;
-            z-index: -1;
         }
         @keyframes twinkle {
-            0% { opacity: 0.6; }
+            0% { opacity: 0.7; }
             100% { opacity: 1; }
         }
+
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -44,130 +55,149 @@
             position: relative;
             z-index: 1;
         }
+
+        /* ---- sidebar – exactly the README feel ---- */
         .profile-sidebar {
             flex: 0 0 300px;
             position: sticky;
             top: 2rem;
             align-self: flex-start;
-            background: rgba(15, 15, 15, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid #333;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            border: 1px solid #2a2a3a;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             max-height: calc(100vh - 4rem);
             overflow-y: auto;
+            line-height: 1.6;
         }
+        .profile-sidebar h1 {
+            font-size: 1.6rem;
+            color: #fff;
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+        .profile-sidebar .bio {
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+        .profile-sidebar ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 1rem 0;
+        }
+        .profile-sidebar ul li {
+            margin-bottom: 0.5rem;
+        }
+        .profile-sidebar a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        .profile-sidebar a:hover { text-decoration: underline; }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1.2rem 0;
+        }
+        .badges img {
+            display: inline-block;
+        }
+
+        .section-title {
+            color: #fff;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.4rem;
+            margin: 1.5rem 0 0.8rem;
+        }
+
+        .quote-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        .quote-container img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        /* ---- main content area ---- */
         .main-content {
             flex: 1;
             min-width: 0;
         }
-        h1, h2, h3 {
-            color: #f0f0f0;
-            border-bottom: 1px solid #333;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .badges img {
-            margin: 0.25rem 0.5rem 0.25rem 0;
-            display: inline-block;
-        }
-        a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-        a:hover { text-decoration: underline; }
 
-        /* File browser */
         #repo-browser {
-            background: rgba(20, 20, 20, 0.85);
-            border-radius: 12px;
-            padding: 1.5rem;
-            backdrop-filter: blur(8px);
-            border: 1px solid #333;
+            background: rgba(20, 20, 30, 0.85);
+            border-radius: 16px;
+            padding: 1.8rem;
+            backdrop-filter: blur(12px);
+            border: 1px solid #2a2a3a;
             margin-bottom: 2rem;
         }
+
         .file-list {
             list-style: none;
             padding-left: 0;
         }
         .file-list li {
-            padding: 0.4rem 0;
-            border-bottom: 1px solid #1a1a1a;
+            padding: 0.4rem 0.5rem;
+            border-bottom: 1px solid #1a1a2a;
+            cursor: pointer;
+            transition: background 0.15s;
         }
         .file-list li:last-child { border-bottom: none; }
-        .file-list .folder {
-            color: #ffd700;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .file-list .file {
-            cursor: pointer;
-            color: #bbb;
-        }
-        .file-list .file:hover, .file-list .folder:hover {
-            background: #222;
-            border-radius: 4px;
-            padding-left: 0.5rem;
-        }
+        .file-list li:hover { background: #2a2a3a; border-radius: 6px; }
+        .file-list .folder { color: #ffd700; font-weight: bold; }
+        .file-list .file { color: #bbb; }
+
         .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 1rem;
         }
         .nav-buttons button {
-            background: #333;
+            background: #2a2a3a;
             color: #fff;
             border: none;
-            padding: 0.5rem 1rem;
+            padding: 0.4rem 0.9rem;
             border-radius: 6px;
             cursor: pointer;
-            margin-right: 0.5rem;
+            font-size: 0.9rem;
         }
-        .nav-buttons button:hover {
-            background: #555;
-        }
+        .nav-buttons button:hover { background: #3a3a5a; }
+        #current-path { color: #aaa; font-size: 0.9rem; }
 
-        /* Book viewer */
         #book-viewer {
-            background: rgba(20, 20, 20, 0.85);
-            border-radius: 12px;
+            background: rgba(20, 20, 30, 0.85);
+            border-radius: 16px;
             padding: 2rem;
-            backdrop-filter: blur(8px);
-            border: 1px solid #333;
+            backdrop-filter: blur(12px);
+            border: 1px solid #2a2a3a;
             line-height: 1.7;
         }
         #book-viewer pre {
-            background: #1a1a1a;
+            background: #0f0f1a;
             padding: 1rem;
             overflow-x: auto;
             border-radius: 8px;
-            margin: 1rem 0;
         }
-        #book-viewer code {
-            font-family: 'Courier New', monospace;
-        }
-        #book-viewer h1, #book-viewer h2, #book-viewer h3 {
-            border-bottom: none;
-            margin: 1.5rem 0 0.8rem;
-            scroll-margin-top: 100px;
-        }
+        #book-viewer code { font-family: 'Courier New', monospace; }
+
         .loading {
             text-align: center;
             padding: 2rem;
+            opacity: 0.7;
         }
-
-        /* TOC inside viewer */
-        #toc {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 2rem;
-        }
-        #toc li { margin: 0.3rem 0; }
-        #toc a { color: #aaa; }
 
         footer {
             text-align: center;
             font-size: 0.85rem;
             opacity: 0.6;
-            margin-top: 4rem;
+            margin-top: 3rem;
             padding-bottom: 2rem;
         }
 
@@ -182,31 +212,40 @@
     </style>
 </head>
 <body>
+
+<!-- starfield background -->
+<div class="stars"></div>
+
 <div class="container">
 
-    <!-- Profile Sidebar -->
+    <!-- SIDEBAR – exactly your README layout -->
     <aside class="profile-sidebar">
-        <h2 style="border-bottom: none; margin-bottom: 1rem;">💫 X1NON</h2>
-        <p><strong>Low‑level enthusiast. C • Linux • Reverse Engineering • Exploit Development</strong><br>
-        I break things to understand them – then I write a book about it.</p>
-        <ul style="margin: 1rem 0; padding-left: 1.2rem;">
-            <li>🔭 Teaching at Novin Zehn & writing <em>C: Zero to Exploit Dev</em></li>
-            <li>🌱 Learning x86‑64 asm & kernel exploitation</li>
-            <li>🧠 Built X1inux from scratch</li>
-            <li>🏆 $500 bug bounty · AI jailbreak (~$10k)</li>
-            <li>⚡ YouTube over Tor? DPI can't catch obfs4</li>
+
+        <h1>💫 About Me</h1>
+        <p class="bio">
+            <strong>Low‑level enthusiast. C • Linux • Reverse Engineering • Exploit Development</strong><br>
+            I break things to understand them — then I write a book about it.
+        </p>
+
+        <ul>
+            <li>🔭 <strong>Currently:</strong> Teaching cybersecurity at an academy, writing a full C‑to‑exploit‑dev course.</li>
+            <li>🌱 <strong>Learning:</strong> x86‑64 assembly, kernel exploitation, and whatever the next crash teaches me.</li>
+            <li>🧠 <strong>Built:</strong> <a href="https://github.com/X1NONs/X1inux" target="_blank">X1inux</a> — a custom Linux distro from scratch with its own toolchain.</li>
+            <li>🏆 <strong>Real‑world:</strong> $500 bug bounty · AI jailbreak (~$10k)</li>
+            <li>💬 <strong>Ask me about:</strong> ELF internals, stack frames, ROP gadgets, or why <code>gets()</code> should be illegal.</li>
+            <li>⚡ <strong>Fun fact:</strong> I route YouTube over Tor on mobile data because DPI can't catch obfs4.</li>
         </ul>
 
-        <h3 style="border-bottom: 1px solid #333; padding-bottom: 0.3rem;">🌐 Socials</h3>
+        <!-- Socials (optional but good to have) -->
         <div class="badges">
-            <a href="https://github.com/x1non"><img src="https://img.shields.io/badge/GitHub-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
+            <a href="https://github.com/X1NONs"><img src="https://img.shields.io/badge/GitHub-%23121011.svg?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
             <a href="mailto:arya@x1inux.dev"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"></a>
             <a href="https://discord.gg/..."><img src="https://img.shields.io/badge/Discord-%237289DA.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-            <img src="https://komarev.com/ghpvc/?username=x1non&color=blueviolet" alt="Visitor Count">
+            <img src="https://komarev.com/ghpvc/?username=X1NONs&color=blueviolet" alt="Visitor Count">
         </div>
 
-        <h3 style="border-bottom: 1px solid #333; padding-bottom: 0.3rem; margin-top: 2rem;">💻 Weapons</h3>
-        <div class="badges" style="line-height: 2.2;">
+        <div class="section-title">💻 Weapons of Choice</div>
+        <div class="badges">
             <img src="https://img.shields.io/badge/c-%2300599C.svg?style=for-the-badge&logo=c&logoColor=white" alt="C">
             <img src="https://img.shields.io/badge/assembly-%23FF0000.svg?style=for-the-badge&logo=intel&logoColor=white" alt="Assembly">
             <img src="https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54" alt="Python">
@@ -224,16 +263,23 @@
             <img src="https://img.shields.io/badge/wireguard-%2388171A.svg?style=for-the-badge&logo=wireguard&logoColor=white" alt="WireGuard">
             <img src="https://img.shields.io/badge/-Raspberry_Pi-C51A4A?style=for-the-badge&logo=Raspberry-Pi" alt="Raspberry Pi">
         </div>
+
+        <!-- Quote of the Day -->
+        <div class="quote-container">
+            <img src="https://quotes-github-readme.vercel.app/api?type=horizontal&theme=tokyonight" alt="Quote of the Day">
+        </div>
+
     </aside>
 
-    <!-- Main area: Repo Browser + Viewer -->
+    <!-- MAIN CONTENT: Book browser + viewer -->
     <main class="main-content">
+
         <section id="browser-section">
-            <h2>📖 C: Zero to Exploit Dev</h2>
+            <h2 style="color:#fff; border-bottom: 1px solid #333; padding-bottom:0.5rem;">📖 C: Zero to Exploit Dev</h2>
             <div id="repo-browser">
                 <div class="nav-buttons">
                     <button id="back-btn" style="display:none;">⬅ Back</button>
-                    <span id="current-path" style="color: #aaa;"></span>
+                    <span id="current-path" style="color:#aaa;"></span>
                 </div>
                 <ul id="file-list" class="file-list">
                     <li class="loading">Loading repository structure...</li>
@@ -248,14 +294,15 @@
         <footer>
             <p>© X1NON – Built with caffeine and kernel panics.</p>
         </footer>
+
     </main>
 </div>
 
 <!-- Marked.js for Markdown rendering -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-    // ====== CONFIGURATION ======
-    const BOOK_REPO = 'https://github.com/X1NONs/C-for-exploit-development';   // <-- Change if needed
+    // ====== CONFIGURATION – change if needed ======
+    const BOOK_REPO = 'X1NONs/C-for-exploit-development';   // your book repository
     const API_BASE = `https://api.github.com/repos/${BOOK_REPO}`;
 
     // Elements
@@ -266,37 +313,30 @@
     const viewerSection = document.getElementById('viewer-section');
     const bookViewer = document.getElementById('book-viewer');
 
-    // State
-    let repoTree = [];                // flat list of {path, type, url}
-    let currentPath = '';             // e.g., '' or 'chapter1/'
-    let currentFileSha = null;        // for raw URL fallback
+    let repoTree = [];
+    let currentPath = '';
 
-    // Fetch the full tree (recursive)
     async function loadRepoTree() {
         try {
-            // Get the default branch
             const repoRes = await fetch(API_BASE);
-            if (!repoRes.ok) throw new Error('Repo not found or private');
+            if (!repoRes.ok) throw new Error('Repo not found or not public');
             const repoData = await repoRes.json();
-            const defaultBranch = repoData.default_branch;
+            const branch = repoData.default_branch;
 
-            // Get tree recursively
-            const treeRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/git/trees/${defaultBranch}?recursive=1`);
+            const treeRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/git/trees/${branch}?recursive=1`);
             if (!treeRes.ok) throw new Error('Failed to load tree');
             const treeData = await treeRes.json();
             repoTree = treeData.tree.filter(item => item.type === 'blob' || item.type === 'tree');
-            // Sort: folders first, then files
             repoTree.sort((a, b) => {
                 if (a.type === b.type) return a.path.localeCompare(b.path);
                 return a.type === 'tree' ? -1 : 1;
             });
             renderDirectory('');
         } catch (err) {
-            fileList.innerHTML = `<li class="loading">⚠️ ${err.message}. Make sure the repo exists and is public.</li>`;
+            fileList.innerHTML = `<li class="loading">⚠️ ${err.message}. Check if the repository is public.</li>`;
         }
     }
 
-    // Render a directory listing for a given path
     function renderDirectory(path) {
         currentPath = path;
         currentPathSpan.textContent = path ? `📁 /${path}` : '';
@@ -304,20 +344,19 @@
         viewerSection.style.display = 'none';
         browserSection.style.display = 'block';
 
-        // Get all items directly inside this path
         const prefix = path ? path + '/' : '';
         const files = repoTree.filter(item => {
             if (!item.path.startsWith(prefix)) return false;
             const relative = item.path.slice(prefix.length);
-            return relative.indexOf('/') === -1; // no subfolder
+            return relative.indexOf('/') === -1;
         });
 
+        fileList.innerHTML = '';
         if (files.length === 0) {
             fileList.innerHTML = '<li class="loading">This folder is empty.</li>';
             return;
         }
 
-        fileList.innerHTML = '';
         files.forEach(item => {
             const li = document.createElement('li');
             if (item.type === 'tree') {
@@ -326,42 +365,35 @@
                 li.addEventListener('click', () => renderDirectory(item.path));
             } else {
                 li.className = 'file';
-                const filename = item.path.split('/').pop();
-                li.textContent = filename;
+                li.textContent = item.path.split('/').pop();
                 li.addEventListener('click', () => openFile(item));
             }
             fileList.appendChild(li);
         });
     }
 
-    // Open a file (Markdown) for viewing
     async function openFile(item) {
         browserSection.style.display = 'none';
         viewerSection.style.display = 'block';
         bookViewer.innerHTML = '<p class="loading">Loading...</p>';
 
         try {
-            // Use GitHub API to get file content (base64)
             const fileRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/contents/${item.path}`);
             if (!fileRes.ok) throw new Error('File not found');
             const fileData = await fileRes.json();
-            const content = atob(fileData.content); // decode base64
+            const content = atob(fileData.content);
             const ext = item.path.split('.').pop().toLowerCase();
 
             if (ext === 'md') {
-                // Render markdown
                 const html = marked.parse(content);
                 bookViewer.innerHTML = html;
-
-                // Build TOC from h2/h3
+                // Add table of contents from h2/h3
                 const tocDiv = document.createElement('div');
                 tocDiv.id = 'toc';
                 const headings = bookViewer.querySelectorAll('h2, h3');
                 if (headings.length > 0) {
-                    const tocHeader = document.createElement('p');
-                    tocHeader.innerHTML = '<strong>Table of Contents</strong>';
-                    tocDiv.appendChild(tocHeader);
-                    const ul = document.createElement('ul');
+                    tocDiv.innerHTML = '<p><strong>Table of Contents</strong></p><ul></ul>';
+                    const ul = tocDiv.querySelector('ul');
                     headings.forEach((heading, i) => {
                         if (!heading.id) heading.id = 'heading-' + i;
                         const li = document.createElement('li');
@@ -372,34 +404,29 @@
                         if (heading.tagName === 'H3') li.style.paddingLeft = '1.5rem';
                         ul.appendChild(li);
                     });
-                    tocDiv.appendChild(ul);
                     bookViewer.prepend(tocDiv);
                 }
-            } else if (['txt', 'c', 'h', 'py', 's', 'asm', 'sh', 'json', 'cfg'].includes(ext)) {
-                // Display as plain text
+            } else if (['txt','c','h','py','s','asm','sh','json'].includes(ext)) {
                 bookViewer.innerHTML = `<pre>${escapeHtml(content)}</pre>`;
             } else {
-                bookViewer.innerHTML = `<p>Cannot preview this file type. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${item.path}" target="_blank">View raw</a></p>`;
+                bookViewer.innerHTML = `<p>Can't preview this file. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${item.path}" target="_blank">View raw</a></p>`;
             }
         } catch (err) {
-            bookViewer.innerHTML = `<p class="loading">⚠️ Error loading file: ${err.message}</p>`;
+            bookViewer.innerHTML = `<p class="loading">⚠️ ${err.message}</p>`;
         }
 
-        // Back button returns to directory
         backBtn.style.display = 'inline-block';
         backBtn.onclick = () => {
             const dirParts = item.path.split('/');
-            dirParts.pop(); // remove file name
-            const dir = dirParts.join('/');
-            renderDirectory(dir);
+            dirParts.pop();
+            renderDirectory(dirParts.join('/'));
         };
     }
 
     function escapeHtml(text) {
-        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // Global back button for directory view
     backBtn.addEventListener('click', () => {
         if (currentPath) {
             const parts = currentPath.split('/');
@@ -408,7 +435,6 @@
         }
     });
 
-    // Start
     loadRepoTree();
 </script>
 </body>
