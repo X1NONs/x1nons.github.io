@@ -218,6 +218,24 @@
         .nav-buttons button:hover { background: #3a3a5a; }
         #current-path { color: #aaa; font-size: 0.9rem; }
 
+        .viewer-nav {
+            margin-bottom: 1.2rem;
+        }
+        .viewer-nav.viewer-nav-bottom {
+            margin-top: 1.5rem;
+            margin-bottom: 0;
+        }
+        .nav-back-btn {
+            background: #2a2a3a;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .nav-back-btn:hover { background: #3a3a5a; }
+
         #book-viewer {
             background: rgba(20, 20, 30, 0.85);
             border-radius: 16px;
@@ -231,6 +249,22 @@
             padding: 1rem;
             overflow-x: auto;
             border-radius: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #3a3a4a rgba(0, 0, 0, 0.2);
+        }
+        #book-viewer pre::-webkit-scrollbar {
+            height: 8px;
+        }
+        #book-viewer pre::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        #book-viewer pre::-webkit-scrollbar-thumb {
+            background: #3a3a4a;
+            border-radius: 8px;
+        }
+        #book-viewer pre::-webkit-scrollbar-thumb:hover {
+            background: #4a4a5f;
         }
         #book-viewer code { font-family: 'Courier New', monospace; }
 
@@ -440,7 +474,13 @@
         </section>
 
         <section id="viewer-section" style="display:none;">
+            <div class="viewer-nav">
+                <button id="back-btn-top" class="nav-back-btn">⬅ Back to files</button>
+            </div>
             <div id="book-viewer"></div>
+            <div class="viewer-nav viewer-nav-bottom">
+                <button id="back-btn-bottom" class="nav-back-btn">⬅ Back to files</button>
+            </div>
         </section>
 
         <section id="terminal-section">
@@ -574,6 +614,8 @@
     // Elements
     const fileList = document.getElementById('file-list');
     const backBtn = document.getElementById('back-btn');
+    const backBtnTop = document.getElementById('back-btn-top');
+    const backBtnBottom = document.getElementById('back-btn-bottom');
     const currentPathSpan = document.getElementById('current-path');
     const browserSection = document.getElementById('browser-section');
     const viewerSection = document.getElementById('viewer-section');
@@ -697,7 +739,7 @@
             bookViewer.innerHTML = `<p class="loading">⚠️ ${err.message}</p>`;
         }
 
-        backBtn.style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
     function escapeHtml(text) {
@@ -722,6 +764,8 @@
         }
     }
     backBtn.addEventListener('click', goBack);
+    backBtnTop.addEventListener('click', goBack);
+    backBtnBottom.addEventListener('click', goBack);
 
     loadRepoTree();
 </script>
