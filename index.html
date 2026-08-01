@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAv/kAAAAAAMfHxwAJCQkA+/v7AIODgwAn1P8AysnJAHNzcwDz8vEA5OTkABPT/wD///8ASkpKAAYGBgAAruoACIfBAF5eXgAaFxMAERERAE5OTgAp1v8A8/PzAPz8/AAA0f8A4+PjAOzs7ADNzM0AGtX/AJaWlgD+/v4AHh4eAOXl5QD39/cAKNX/AADO/QDe3t4AICAgAOfn5wBdXV0A8PDwAACcyAA7OzsAmpqaABbU/wDg4OAAAD1bAAR7tAAAxv8A6enpAITo/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQEMFyYtJgQeMSQgIQwBAQEBIRswMA8qHQgPMAcWAQEBAQwVFRUYAQEBABUVBgEBAQEMIhUVAQEBAQ8jFTIBAQEBDAwsKQEaKBEcKQEMAQEBAQwMAQEaDAwZEQEBDAEBAQEMDAEBGgwMDBoBAQwBAQEBDAwMAQgMDAwIARoMAQEBAQwMDBoUDAwMAQEMDAEBAQEMDAwMDC8QCgMaDAwBAQEBDAwMDCcYCy4lDAwMAQEBAQwMDAwOKwIFEgwMDAEBAQEMDAweHwEBAQ0JDAwBAQEBDAwMDAwBARMMDAwMAQEBAQwMDAwMDAwMDAwMDAEBAQEMDAwMDB4MDAwMDAwBAcADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAADAAwAAwAMAAMADAAA=" rel="icon" type="image/x-icon">
+    <link href="favicon.ico" rel="icon" type="image/x-icon">
+    <link href="apple-touch-icon.png" rel="apple-touch-icon">
     <meta name="google-site-verification" content="mvg5wzvNHMPrZoTEWPAaHkllIIsTvcxPvF1YGNrXYAQ" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html {
+            /* prevents a white flash when the page rubber-bands past the
+               top/bottom edge on mobile or trackpad overscroll */
+            background: #000;
+        }
         body {
             /* deep space gradient + animated stars */
             background: radial-gradient(ellipse at bottom, #0d1b2a 0%, #000000 80%);
@@ -575,16 +581,19 @@
 
     let repoTree = [];
     let currentPath = '';
+    let currentOpenFile = null; // tracks the file being viewed, null when browsing folders
 
     async function loadRepoTree() {
         try {
             const repoRes = await fetch(API_BASE);
-            if (!repoRes.ok) throw new Error('Repo not found or not public');
+            if (repoRes.status === 403) throw new Error('GitHub API rate limit reached — please try again in a few minutes.');
+            if (!repoRes.ok) throw new Error('Repo not found or not public.');
             const repoData = await repoRes.json();
             const branch = repoData.default_branch;
 
             const treeRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/git/trees/${branch}?recursive=1`);
-            if (!treeRes.ok) throw new Error('Failed to load tree');
+            if (treeRes.status === 403) throw new Error('GitHub API rate limit reached — please try again in a few minutes.');
+            if (!treeRes.ok) throw new Error('Failed to load repository tree.');
             const treeData = await treeRes.json();
             repoTree = treeData.tree.filter(item => item.type === 'blob' || item.type === 'tree');
             repoTree.sort((a, b) => {
@@ -593,12 +602,13 @@
             });
             renderDirectory('');
         } catch (err) {
-            fileList.innerHTML = `<li class="loading">⚠️ ${err.message}. Check if the repository is public.</li>`;
+            fileList.innerHTML = `<li class="loading">⚠️ ${err.message}</li>`;
         }
     }
 
     function renderDirectory(path) {
         currentPath = path;
+        currentOpenFile = null;
         currentPathSpan.textContent = path ? `📁 /${path}` : '';
         backBtn.style.display = path ? 'inline-block' : 'none';
         viewerSection.style.display = 'none';
@@ -636,9 +646,16 @@
         browserSection.style.display = 'none';
         viewerSection.style.display = 'block';
         bookViewer.innerHTML = '<p class="loading">Loading...</p>';
+        currentOpenFile = item;
+
+        // Encode each path segment (not the whole path, so "/" stays a separator).
+        // Without this, filenames with spaces, "?", "#", etc. build a broken URL —
+        // e.g. a "?" gets read as the start of a query string and truncates the path.
+        const encodedPath = item.path.split('/').map(encodeURIComponent).join('/');
 
         try {
-            const fileRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/contents/${item.path}`);
+            const fileRes = await fetch(`https://api.github.com/repos/${BOOK_REPO}/contents/${encodedPath}`);
+            if (fileRes.status === 403) throw new Error('GitHub API rate limit reached — please try again in a few minutes.');
             if (!fileRes.ok) throw new Error('File not found');
             const fileData = await fileRes.json();
             const content = atob(fileData.content);
@@ -674,31 +691,37 @@
                 bookViewer.innerHTML = `<pre><code${codeClass}>${escapeHtml(content)}</code></pre>`;
                 if (lang && typeof Prism !== 'undefined') Prism.highlightAllUnder(bookViewer);
             } else {
-                bookViewer.innerHTML = `<p>Can't preview this file. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${item.path}" target="_blank">View raw</a></p>`;
+                bookViewer.innerHTML = `<p>Can't preview this file. <a href="https://raw.githubusercontent.com/${BOOK_REPO}/main/${encodedPath}" target="_blank">View raw</a></p>`;
             }
         } catch (err) {
             bookViewer.innerHTML = `<p class="loading">⚠️ ${err.message}</p>`;
         }
 
         backBtn.style.display = 'inline-block';
-        backBtn.onclick = () => {
-            const dirParts = item.path.split('/');
-            dirParts.pop();
-            renderDirectory(dirParts.join('/'));
-        };
     }
 
     function escapeHtml(text) {
         return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    backBtn.addEventListener('click', () => {
+    // Single source of truth for "Back": if a file is open, go to the folder
+    // that contains it; otherwise go up one level from the current folder.
+    // (Previously there were two separate handlers here that could disagree
+    // about the target folder — this replaces both.)
+    function goBack() {
+        if (currentOpenFile) {
+            const parts = currentOpenFile.path.split('/');
+            parts.pop();
+            renderDirectory(parts.join('/'));
+            return;
+        }
         if (currentPath) {
             const parts = currentPath.split('/');
             parts.pop();
             renderDirectory(parts.join('/'));
         }
-    });
+    }
+    backBtn.addEventListener('click', goBack);
 
     loadRepoTree();
 </script>
